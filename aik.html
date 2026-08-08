@@ -1,0 +1,634 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KIET Group — Build Status</title>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a2424;
+      --surface:   #0f3030;
+      --surface2:  #163c3c;
+      --border:    #2a5454;
+      --accent:    #2db388;
+      --accent-h:  #34c99a;
+      --brand:     #5de6d6;
+      --text:      #f0fafa;
+      --muted:     #8bbcbc;
+      --danger:    #f85149;
+      --radius:    12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Site Header ─────────────────────────────────────────────── */
+    .site-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .site-logo {
+      height: 72px;
+      width: auto;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .site-header h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+
+    .participant-count {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 2rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+
+    .participant-count:hover {
+      background: var(--border);
+      border-color: var(--brand);
+    }
+
+    .participant-count-num {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--brand);
+    }
+
+    .participant-count-label {
+      font-size: 1.9rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 600px) {
+      .site-header { padding: 2rem 1rem; }
+      .site-header h1 { font-size: 2.8rem; }
+      .site-logo { height: 52px; }
+      .participant-count-num { font-size: 3rem; }
+      .participant-count-label { font-size: 1.4rem; }
+    }
+
+    /* ── Main ────────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      padding: 2.5rem 2rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Build Info Banner ───────────────────────────────────────── */
+    .build-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+      display: none;
+    }
+
+    .build-info strong { color: var(--text); }
+
+    /* ── New Folders Section ─────────────────────────────────────── */
+    .new-folders-section {
+      display: none;
+      margin-bottom: 2.5rem;
+    }
+
+    .new-folders-section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent-h);
+      margin-bottom: 1rem;
+    }
+
+    .new-folders-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .new-folders-list li {
+      background: rgba(45, 179, 136, .12);
+      border: 1px solid rgba(45, 179, 136, .3);
+      color: var(--accent-h);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+    }
+
+    .no-new-folders {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    /* ── Search ──────────────────────────────────────────────────── */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      max-width: 420px;
+      margin: 0 auto 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 1rem;
+      transition: border-color .2s;
+    }
+
+    .search-wrap:focus-within { border-color: var(--brand); }
+
+    .search-icon { color: var(--muted); font-size: 1.2rem; flex-shrink: 0; }
+
+    #searchInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      padding: 0.8rem 0;
+    }
+
+    #searchInput::placeholder { color: var(--muted); }
+
+    /* ── Spinner ─────────────────────────────────────────────────── */
+    #spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 5rem 2rem;
+    }
+
+    .spin-ring {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #spinner p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Error ───────────────────────────────────────────────────── */
+    #errorBox {
+      display: none;
+      max-width: 540px;
+      margin: 4rem auto;
+      background: rgba(248, 81, 73, .08);
+      border: 1px solid rgba(248, 81, 73, .4);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    #errorBox h3 { color: var(--danger); font-size: 1.1rem; margin-bottom: 0.5rem; }
+    #errorBox p  { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+    /* ── Table ───────────────────────────────────────────────────── */
+    #tableWrap {
+      display: none;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+    }
+
+    thead {
+      background: var(--surface2);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    thead th {
+      padding: 0.85rem 1.25rem;
+      text-align: left;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--surface2);
+      transition: background .15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: var(--surface2); }
+
+    td {
+      padding: 0.9rem 1.25rem;
+      vertical-align: middle;
+    }
+
+    .td-num {
+      color: var(--muted);
+      font-size: 0.85rem;
+      width: 3rem;
+      text-align: center;
+    }
+
+    .td-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .td-roll {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .roll-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-h);
+      flex-shrink: 0;
+    }
+
+    .td-link a {
+      color: var(--brand);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: background .15s, border-color .15s;
+      white-space: nowrap;
+    }
+
+    .td-link a:hover {
+      background: var(--surface2);
+      border-color: var(--brand);
+    }
+
+    .new-badge, .valid-badge, .invalid-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    .new-badge {
+      background: rgba(45, 179, 136, .15);
+      color: var(--accent-h);
+      margin-left: 0.5rem;
+    }
+
+    .valid-badge {
+      background: rgba(45, 179, 136, .15);
+      color: var(--accent-h);
+    }
+
+    .invalid-badge {
+      background: rgba(248, 81, 73, .12);
+      color: var(--danger);
+    }
+
+    /* ── No results ──────────────────────────────────────────────── */
+    #noResults {
+      display: none;
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem 0;
+      font-size: 0.95rem;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 1.25rem 2rem;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--brand); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      main { padding: 1.5rem 1rem 3rem; }
+      thead th { font-size: 0.72rem; padding: 0.7rem 0.9rem; }
+      td { padding: 0.75rem 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── CONFIG ───────────────────────────────────────────────────── -->
+<script>
+  const CONFIG = {
+    OWNER: "tejasree22-2",
+    REPO:  "kiet-bootcamp",
+    BRANCH: "main",
+    PARTICIPANTS_DIR: "students",
+  };
+</script>
+
+<!-- ── HEADER ──────────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="site-header-left">
+    <img src="aiklogo.png" alt="KIET Group logo" class="site-logo" />
+    <h1>KIET Group</h1>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="participant-count">
+      <span class="participant-count-num" id="participantCount">—</span>
+      <span class="participant-count-label">Participants</span>
+    </a>
+  </div>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────────────────────────── -->
+<main>
+  <!-- Build info -->
+  <div class="build-info" id="buildInfo"></div>
+
+  <!-- Newly added folders -->
+  <div class="new-folders-section" id="newFoldersSection">
+    <h2>Newly Added Participants (Latest Build)</h2>
+    <div id="newFoldersContent"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap" id="searchWrap" style="display:none">
+    <span class="search-icon" aria-hidden="true">&#x1F50D;</span>
+    <input type="text" id="searchInput" placeholder="Search by name or roll number…" autocomplete="off" />
+  </div>
+
+  <!-- Spinner -->
+  <div id="spinner">
+    <div class="spin-ring"></div>
+    <p>Loading data…</p>
+  </div>
+
+  <!-- Error -->
+  <div id="errorBox">
+    <h3 id="errorTitle">Something went wrong</h3>
+    <p id="errorMsg">Unable to load participant data.</p>
+  </div>
+
+  <!-- Table -->
+  <div id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="td-num">#</th>
+          <th>Name</th>
+          <th>Roll Number</th>
+          <th>Status</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- No results -->
+  <div id="noResults">No participants match your search.</div>
+</main>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────── -->
+<footer>
+  <p>
+    KIET Group &nbsp;·&nbsp; Git &amp; GitHub Bootcamp &nbsp;·&nbsp;
+    <a href="#" id="repoLink" target="_blank" rel="noopener">View Repository</a>
+  </p>
+</footer>
+
+<!-- ── SCRIPT ────────────────────────────────────────────────────── -->
+<script>
+(() => {
+  "use strict";
+
+  const { OWNER, REPO, BRANCH, PARTICIPANTS_DIR } = CONFIG;
+
+  document.getElementById("repoLink").href = `https://github.com/${OWNER}/${REPO}`;
+
+  const spinner      = document.getElementById("spinner");
+  const errorBox     = document.getElementById("errorBox");
+  const errorTitle   = document.getElementById("errorTitle");
+  const errorMsg     = document.getElementById("errorMsg");
+  const tableWrap    = document.getElementById("tableWrap");
+  const tableBody    = document.getElementById("tableBody");
+  const searchWrap   = document.getElementById("searchWrap");
+  const searchInput  = document.getElementById("searchInput");
+  const noResults    = document.getElementById("noResults");
+  const countEl      = document.getElementById("participantCount");
+  const buildInfo    = document.getElementById("buildInfo");
+  const newFoldersSection = document.getElementById("newFoldersSection");
+  const newFoldersContent = document.getElementById("newFoldersContent");
+
+  let allParticipants = [];
+  let newFolderSet = new Set();
+
+  function escHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  /* ── Render table ──────────────────────────────────────────────── */
+  function renderTable(list) {
+    tableBody.innerHTML = "";
+    if (list.length === 0) {
+      noResults.style.display = "block";
+      return;
+    }
+    noResults.style.display = "none";
+
+    list.forEach((p, i) => {
+      const profileUrl = `https://github.com/${OWNER}/${REPO}/tree/${BRANCH}/${PARTICIPANTS_DIR}/${encodeURIComponent(p.folderName)}`;
+      const isNew = newFolderSet.has(p.folderName);
+      const statusBadge = p.valid
+        ? '<span class="valid-badge">valid</span>'
+        : '<span class="invalid-badge">invalid format</span>';
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="td-num">${i + 1}</td>
+        <td class="td-name">${escHtml(p.name)}${isNew ? '<span class="new-badge">new</span>' : ''}</td>
+        <td>
+          <div class="td-roll">
+            <span class="roll-dot"></span>
+            ${escHtml(String(p.roll))}
+          </div>
+        </td>
+        <td>${statusBadge}</td>
+        <td class="td-link">
+          <a href="${escHtml(profileUrl)}" target="_blank" rel="noopener">View →</a>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  /* ── Search ─────────────────────────────────────────────────── */
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = q
+      ? allParticipants.filter(p =>
+          p.name.toLowerCase().includes(q) || String(p.roll).toLowerCase().includes(q)
+        )
+      : allParticipants;
+    renderTable(filtered);
+  });
+
+  /* ── Init ───────────────────────────────────────────────────── */
+  async function init() {
+    spinner.style.display    = "flex";
+    errorBox.style.display   = "none";
+    tableWrap.style.display  = "none";
+    searchWrap.style.display = "none";
+    noResults.style.display  = "none";
+    tableBody.innerHTML      = "";
+    countEl.textContent      = "—";
+    allParticipants          = [];
+
+    // Load both JSON files in parallel
+    let participants, buildData;
+
+    try {
+      const [studentsRes, foldersRes] = await Promise.all([
+        fetch("all_students.json"),
+        fetch("new_folders.json")
+      ]);
+
+      if (!studentsRes.ok) throw new Error(`all_students.json: HTTP ${studentsRes.status}`);
+      participants = await studentsRes.json();
+
+      if (foldersRes.ok) {
+        buildData = await foldersRes.json();
+      }
+    } catch (err) {
+      spinner.style.display  = "none";
+      errorTitle.textContent = "Failed to load data";
+      errorMsg.textContent   = "Could not load data files. The site may need to be rebuilt. " + err.message;
+      errorBox.style.display = "block";
+      return;
+    }
+
+    if (!Array.isArray(participants) || participants.length === 0) {
+      spinner.style.display  = "none";
+      errorTitle.textContent = "No participants found";
+      errorMsg.textContent   = "all_students.json is empty or invalid. Please trigger a rebuild.";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    // Show build info
+    if (buildData) {
+      const buildTime = buildData.buildTime
+        ? new Date(buildData.buildTime).toLocaleString()
+        : "Unknown";
+      buildInfo.innerHTML =
+        `<strong>Last build:</strong> ${escHtml(buildTime)} &nbsp;·&nbsp; ` +
+        `<strong>Total folders:</strong> ${buildData.totalFolders} &nbsp;·&nbsp; ` +
+        `<strong>Newly added:</strong> ${buildData.newCount}`;
+      buildInfo.style.display = "block";
+
+      // Show newly added folders
+      newFolderSet = new Set(buildData.newFolders || []);
+      newFoldersSection.style.display = "block";
+
+      if (buildData.newFolders && buildData.newFolders.length > 0) {
+        const ul = document.createElement("ul");
+        ul.className = "new-folders-list";
+        buildData.newFolders.forEach(folder => {
+          const li = document.createElement("li");
+          li.textContent = folder;
+          ul.appendChild(li);
+        });
+        newFoldersContent.innerHTML = "";
+        newFoldersContent.appendChild(ul);
+      } else {
+        newFoldersContent.innerHTML = '<p class="no-new-folders">No new folders were added in the latest build.</p>';
+      }
+    }
+
+    // Sort by folder name (newest first)
+    participants.sort((a, b) => b.folderName.localeCompare(a.folderName));
+
+    allParticipants     = participants;
+    countEl.textContent = participants.length;
+
+    spinner.style.display    = "none";
+    tableWrap.style.display  = "block";
+    searchWrap.style.display = "flex";
+    renderTable(allParticipants);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
